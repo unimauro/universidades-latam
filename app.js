@@ -23,27 +23,84 @@ const navA = [...document.querySelectorAll('nav.links a')];
 window.addEventListener('scroll', () => { let cur = ''; document.querySelectorAll('section').forEach(s => { if (window.scrollY >= s.offsetTop - 120) cur = s.id; }); navA.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + cur)); });
 navA.forEach(a => a.addEventListener('click', () => document.getElementById('nav').classList.remove('show')));
 
-let U = [], sortK = 'rank', sortAsc = true, mapObj = null;
+let U = [], sortK = 'rank', sortAsc = true, mapObj = null, cmpSel = {};
+
+// ---- Combobox con buscador (reemplaza el <select> nativo feo) ----
+function makeCombo(id, initialOa) {
+  const box = document.getElementById(id); if (!box) return;
+  const sel = U.find(u => u.oa === initialOa) || U[0];
+  cmpSel[id] = sel && sel.oa;
+  box.innerHTML = `<input readonly placeholder="Buscar universidad…"><div class="list"></div>`;
+  const inp = box.querySelector('input'), list = box.querySelector('.list');
+  let hi = -1, shown = [];
+  const setLabel = () => { const s = U.find(u => u.oa === cmpSel[id]); inp.value = s ? s.name : ''; };
+  const draw = q => {
+    q = (q || '').trim().toLowerCase();
+    shown = U.filter(u => !q || (`${u.name} ${PAIS[u.cc] || ''}`).toLowerCase().includes(q)).slice(0, 80);
+    hi = -1;
+    list.innerHTML = shown.length ? shown.map(u => `<div class="opt" data-oa="${esc(u.oa)}"><span class="orank">#${u.rank}</span><span class="oflag">${FLAG[u.cc] || ''}</span><span class="oname">${esc(u.name)} <small>${esc(PAIS[u.cc] || u.cc)}</small></span></div>`).join('') : '<div class="empty">Sin resultados</div>';
+  };
+  const open = () => { box.classList.add('open'); inp.removeAttribute('readonly'); inp.value = ''; draw(''); inp.focus(); };
+  const close = () => { box.classList.remove('open'); inp.setAttribute('readonly', ''); setLabel(); };
+  const pick = oa => { cmpSel[id] = oa; close(); drawCmp(); };
+  inp.addEventListener('focus', () => !box.classList.contains('open') && open());
+  inp.addEventListener('mousedown', e => { if (!box.classList.contains('open')) { e.preventDefault(); open(); } });
+  inp.addEventListener('input', () => draw(inp.value));
+  list.addEventListener('mousedown', e => { const o = e.target.closest('.opt'); if (o) { e.preventDefault(); pick(o.dataset.oa); } });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); hi = Math.min(hi + 1, shown.length - 1); mark(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); hi = Math.max(hi - 1, 0); mark(); }
+    else if (e.key === 'Enter' && hi >= 0) { e.preventDefault(); pick(shown[hi].oa); }
+    else if (e.key === 'Escape') close();
+  });
+  const mark = () => { [...list.children].forEach((c, i) => c.classList.toggle('hi', i === hi)); if (list.children[hi]) list.children[hi].scrollIntoView({ block: 'nearest' }); };
+  box._close = close; close();
+}
+document.addEventListener('mousedown', e => document.querySelectorAll('.combo.open').forEach(b => { if (!b.contains(e.target) && b._close) b._close(); }));
 
 async function boot() {
   try { const r = await fetch('data/universidades.json?v=' + Date.now()); const d = await r.json(); const all = d.unis || []; window._meta = d.meta || {}; window._centros = all.filter(x => x.tipo && x.tipo !== 'universidad'); U = all.filter(x => !x.tipo || x.tipo === 'universidad'); } catch { U = []; }
   // poblar filtro país y comparador
   const paises = [...new Set(U.map(u => u.cc))].sort((a, b) => (PAIS[a] || a).localeCompare(PAIS[b] || b));
   document.getElementById('fPais').insertAdjacentHTML('beforeend', paises.map(c => `<option value="${c}">${FLAG[c] || ''} ${esc(PAIS[c] || c)}</option>`).join(''));
-  const opts = U.slice(0, 200).map(u => `<option value="${esc(u.oa)}">${esc(u.name)}</option>`).join('');
-  document.getElementById('cmpA').innerHTML = opts; document.getElementById('cmpB').innerHTML = opts;
-  if (U[0]) document.getElementById('cmpA').value = U[0].oa;
-  if (U[1]) document.getElementById('cmpB').value = U[1].oa;
+  makeCombo('cmpA', U[0] && U[0].oa); makeCombo('cmpB', U[1] && U[1].oa);
   // listeners
   document.getElementById('q').addEventListener('input', drawRank);
   document.getElementById('fReg').addEventListener('change', drawRank);
   document.getElementById('fPais').addEventListener('change', drawRank);
   document.querySelectorAll('#tRank th').forEach(th => th.addEventListener('click', () => { const k = th.dataset.k; sortAsc = sortK === k ? !sortAsc : (k === 'name' || k === 'cc'); sortK = k; drawRank(); }));
-  document.getElementById('cmpA').addEventListener('change', drawCmp);
-  document.getElementById('cmpB').addEventListener('change', drawCmp);
   render();
 }
-function render() { renderKpis(); drawRank(); drawPaises(); drawMap(); drawCmp(); }
+function render() { renderPodio(); renderKpis(); drawRank(); drawPaises(); drawMap(); drawCmp(); }
+
+// ---- Podio top 3 en el hero (elemento vendedor) ----
+function renderPodio() {
+  const el = document.getElementById('podio'); if (!el || !U.length) return;
+  const medals = ['🥇', '🥈', '🥉'], pos = ['1.º de la región', '2.º de la región', '3.º de la región'];
+  el.innerHTML = U.slice(0, 3).map((u, i) => `
+    <div class="pod p${i + 1}">
+      <div class="medal">${medals[i]}</div>
+      <div class="pos">${pos[i]}</div>
+      <div class="pname">${esc(u.name)}</div>
+      <div class="pmeta">${FLAG[u.cc] || ''} ${esc(PAIS[u.cc] || u.cc)} · h-index ${u.h ?? '—'}</div>
+      <div class="pscore">${u.score}<small> / 100 índice</small></div>
+    </div>`).join('');
+}
+
+// ---- Constelación de fondo del hero ----
+function starfield() {
+  const c = document.getElementById('stars'); if (!c) return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ctx = c.getContext('2d'); let stars = [], raf = null;
+  function size() { c.width = c.offsetWidth; c.height = c.offsetHeight; stars = Array.from({ length: Math.min(90, Math.floor(c.width / 14)) }, () => ({ x: Math.random() * c.width, y: Math.random() * c.height, r: Math.random() * 1.4 + .3, a: Math.random() * .5 + .2, s: Math.random() * .4 + .1 })); }
+  function draw() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    stars.forEach(st => { ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, 7); ctx.fillStyle = `rgba(${st.r > 1.1 ? '230,192,101' : '200,214,245'},${st.a})`; ctx.fill(); if (!reduce) { st.y -= st.s; if (st.y < 0) { st.y = c.height; st.x = Math.random() * c.width; } } });
+    if (!reduce) raf = requestAnimationFrame(draw);
+  }
+  size(); draw(); window.addEventListener('resize', () => { if (raf) cancelAnimationFrame(raf); size(); draw(); });
+}
+starfield();
 
 function renderKpis() {
   const el = document.getElementById('kpis'); if (!el || !U.length) return;
@@ -75,11 +132,13 @@ function filtered() {
 function drawRank() {
   const rows = filtered();
   const tb = document.querySelector('#tRank tbody');
-  tb.innerHTML = rows.slice(0, 300).map(u => `<tr>
-    <td class="rk">${u.rank}</td>
-    <td>${esc(u.name)}</td>
+  const maxScore = U[0] ? U[0].score : 100;
+  const medal = r => r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : '';
+  tb.innerHTML = rows.slice(0, 300).map(u => `<tr class="${u.rank <= 3 ? 'top' : ''}">
+    <td class="rk">${medal(u.rank) || u.rank}</td>
+    <td><span class="uname">${esc(u.name)}</span></td>
     <td><span class="flag">${FLAG[u.cc] || ''}</span>${esc(PAIS[u.cc] || u.cc)}</td>
-    <td class="n"><strong>${u.score}</strong></td>
+    <td class="n"><span class="idx"><span class="ibar"><i style="width:${Math.round(100 * u.score / maxScore)}%"></i></span><b>${u.score}</b></span></td>
     <td class="n">${fmtN(u.works)}</td>
     <td class="n">${fmtN(u.cited)}</td>
     <td class="n">${u.h ?? '—'}</td>
@@ -137,8 +196,8 @@ function drawMap() {
 
 let cmpChart = null;
 function drawCmp() {
-  const a = U.find(u => u.oa === document.getElementById('cmpA').value);
-  const b = U.find(u => u.oa === document.getElementById('cmpB').value);
+  const a = U.find(u => u.oa === cmpSel.cmpA);
+  const b = U.find(u => u.oa === cmpSel.cmpB);
   if (!a || !b) return;
   const maxes = { works: Math.max(a.works, b.works), cited: Math.max(a.cited, b.cited), h: Math.max(a.h || 0, b.h || 0), cpp: Math.max(a.cpp || 0, b.cpp || 0), q1: Math.max(a.q1_pct || 0, b.q1_pct || 0) };
   const norm = u => [u.works / maxes.works, u.cited / maxes.cited, (u.h || 0) / maxes.h, (u.cpp || 0) / (maxes.cpp || 1), (u.q1_pct || 0) / (maxes.q1 || 1)].map(x => Math.round(x * 100));

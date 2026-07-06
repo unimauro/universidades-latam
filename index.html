@@ -52,10 +52,24 @@ nav.links a{font-size:13.5px;color:var(--muted);text-decoration:none;padding:6px
 nav.links a:hover,nav.links a.on{color:var(--primary);background:color-mix(in srgb,var(--primary) 10%,transparent)}
 :root[data-theme="dark"] nav.links a:hover,:root[data-theme="dark"] nav.links a.on{color:var(--oro);background:rgba(217,173,66,.12)}
 .burger{display:none;margin-left:auto;background:none;border:0;font-size:24px;color:var(--tinta);cursor:pointer}
-.hero{background:linear-gradient(135deg,#0a1330,#0e1a3a 45%,#1b2c5a);color:#fff;padding:58px 0 46px}
-.hero h1{color:#fff;font-size:clamp(30px,5.2vw,50px);font-weight:600}
-.hero p{max-width:760px;color:#c7d2ef;font-size:17px}
-.tag{display:inline-block;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);border-radius:30px;padding:4px 13px;font-size:12.5px;margin-bottom:16px;letter-spacing:.02em}
+.hero{position:relative;background:radial-gradient(1200px 500px at 80% -10%,#22346b 0%,transparent 60%),linear-gradient(160deg,#0a1330,#0c1738 45%,#131f47);color:#fff;padding:64px 0 54px;overflow:hidden}
+#stars{position:absolute;inset:0;pointer-events:none;opacity:.7}
+.hero .wrap{position:relative;z-index:2}
+.hero h1{color:#fff;font-size:clamp(32px,5.4vw,54px);font-weight:600;line-height:1.05;max-width:900px}
+.hero h1 em{font-style:italic;color:#e6c065}
+.hero p{max-width:720px;color:#c3d0ee;font-size:17px}
+.tag{display:inline-flex;align-items:center;gap:7px;background:rgba(230,192,101,.12);border:1px solid rgba(230,192,101,.35);color:#f0d89a;border-radius:30px;padding:5px 14px;font-size:12px;margin-bottom:18px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+/* podio del top 3 en el hero */
+.podio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px;max-width:760px}
+.pod{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:18px 16px 16px;backdrop-filter:blur(6px)}
+.pod.p1{border-color:rgba(230,192,101,.5);background:linear-gradient(180deg,rgba(230,192,101,.16),rgba(230,192,101,.03))}
+.pod .medal{font-size:22px}
+.pod .pos{font-family:var(--serif);font-size:13px;color:#e6c065;font-weight:600;letter-spacing:.04em}
+.pod .pname{font-family:var(--serif);font-size:17px;font-weight:600;color:#fff;margin:6px 0 2px;line-height:1.2}
+.pod .pmeta{font-size:12.5px;color:#a9b8de}
+.pod .pscore{font-family:var(--serif);font-size:30px;font-weight:700;color:#fff;line-height:1;margin-top:8px}
+.pod .pscore small{font-size:12px;color:#a9b8de;font-weight:400;font-family:var(--sans)}
+@media(max-width:620px){.podio{grid-template-columns:1fr;gap:10px}}
 section{padding:46px 0;border-bottom:1px solid var(--line)}
 section h2{font-size:clamp(22px,3.4vw,30px);color:var(--primary)}
 :root[data-theme="dark"] section h2{color:var(--oro)}
@@ -78,13 +92,36 @@ th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
 th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;user-select:none}
 th:hover{color:var(--primary)}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
-.scroll{max-height:620px;overflow:auto}
-.rk{font-family:var(--serif);font-weight:700;color:var(--primary)}
+.scroll{max-height:640px;overflow:auto;border-radius:12px}
+#tRank tbody tr{transition:background .12s}
+#tRank tbody tr:hover{background:color-mix(in srgb,var(--primary) 6%,transparent)}
+#tRank tbody tr.top td{background:color-mix(in srgb,var(--oro) 8%,transparent)}
+.rk{font-family:var(--serif);font-weight:700;color:var(--primary);font-size:15px}
 :root[data-theme="dark"] .rk{color:var(--oro)}
-.flag{font-size:15px;margin-right:4px}
+.uname{font-weight:600}
+.idx{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
+.idx b{font-family:var(--serif);font-weight:700;font-size:15px}
+.ibar{width:42px;height:6px;border-radius:4px;background:color-mix(in srgb,var(--muted) 22%,transparent);overflow:hidden}
+.ibar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--primary),var(--oro))}
+.flag{font-size:15px;margin-right:5px}
 input,select{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--tinta);font-size:14px;font-family:inherit}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%235f6b86' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px;cursor:pointer}
 .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 14px}
 .controls input{flex:1;min-width:200px}
+/* combobox con buscador */
+.combo{position:relative;flex:1;min-width:220px}
+.combo>input{width:100%;padding:11px 34px 11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--tinta);font-size:14.5px;font-family:inherit;cursor:pointer;box-shadow:var(--shadow)}
+.combo>input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent)}
+.combo::after{content:"";position:absolute;right:13px;top:50%;transform:translateY(-50%);width:9px;height:9px;border-right:1.8px solid var(--muted);border-bottom:1.8px solid var(--muted);rotate:45deg;pointer-events:none;transition:rotate .15s}
+.combo.open::after{rotate:225deg;top:56%}
+.combo .list{position:absolute;z-index:30;top:calc(100% + 6px);left:0;right:0;max-height:340px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 40px rgba(20,35,80,.18);display:none;padding:6px}
+.combo.open .list{display:block}
+.combo .opt{padding:9px 12px;border-radius:9px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:9px;line-height:1.25}
+.combo .opt:hover,.combo .opt.hi{background:color-mix(in srgb,var(--primary) 10%,transparent)}
+.combo .opt .oflag{font-size:15px}.combo .opt .orank{font-family:var(--serif);font-weight:700;color:var(--primary);font-size:12.5px;min-width:30px}
+:root[data-theme="dark"] .combo .opt .orank{color:var(--oro)}
+.combo .opt .oname{flex:1}.combo .opt small{color:var(--muted)}
+.combo .empty{padding:14px;text-align:center;color:var(--muted);font-size:13px}
 .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:color-mix(in srgb,var(--oro) 20%,transparent);color:var(--tinta)}
 .note{font-size:12.5px;color:var(--muted);margin-top:10px}
 #map{height:560px;border-radius:16px;border:1px solid var(--line)}
@@ -117,10 +154,13 @@ footer{padding:34px 0;color:var(--muted);font-size:13px}
   </nav>
 </div></header>
 <a id="top"></a>
-<div class="hero"><div class="wrap">
-  <span class="tag">OpenAlex · SCImago · 21 países · reproducible</span>
-  <h1>Ranking de Universidades de Latinoamérica y España</h1>
-  <p>Un ranking <strong>bibliométrico, abierto y reproducible</strong> de casi mil universidades de la región, construido solo con datos abiertos (OpenAlex, licencia CC0). Sin cajas negras: cualquiera puede verificar cada número. Más transparente que los rankings tradicionales.</p>
+<div class="hero">
+  <canvas id="stars"></canvas>
+  <div class="wrap">
+  <span class="tag">✦ OpenAlex · SCImago · 21 países · reproducible</span>
+  <h1>El mapa del conocimiento de <em>Latinoamérica y España</em></h1>
+  <p>Un ranking bibliométrico, abierto y reproducible de casi mil universidades de la región. Solo datos abiertos, sin cajas negras: cada número se puede verificar. Hacemos visible lo que los rankings globales dejan en la sombra.</p>
+  <div class="podio" id="podio"></div>
 </div></div>
 
 <section id="resumen"><div class="wrap">
@@ -173,7 +213,7 @@ footer{padding:34px 0;color:var(--muted);font-size:13px}
   <h2>Comparador</h2>
   <p class="lead">Elige dos universidades y compáralas en todos los indicadores.</p>
   <div class="controls">
-    <select id="cmpA" style="flex:1"></select><select id="cmpB" style="flex:1"></select>
+    <div class="combo" id="cmpA"></div><div class="combo" id="cmpB"></div>
   </div>
   <div class="card"><div class="chart-box"><canvas id="cCmp"></canvas></div></div>
   <div id="cmpTable" style="margin-top:16px"></div>
