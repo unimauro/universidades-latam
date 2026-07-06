@@ -195,8 +195,17 @@ footer{padding:34px 0;color:var(--muted);font-size:13px}
     <div class="card">
       <h3>Índice de impacto (anti-volumen inflado)</h3>
       <p style="font-size:14px;color:var(--muted)">score = 100 · (0,45·<em>h</em> + 0,25·<em>citas/pub</em> + 0,15·<em>volumen</em> + 0,15·<em>citas</em>), normalizado. Pondera el <strong>impacto</strong> por encima de la cantidad: publicar mucho en revistas de bajo perfil no infla el puesto. Volumen y citas en escala logarítmica; citas/pub con tope en el percentil 95 para que un solo paper hiper-citado no domine.</p>
-      <p class="note"><strong>Advertencia honesta:</strong> ranking exploratorio, no oficial. Las mega-colaboraciones (física de partículas) inflan el h-index de universidades pequeñas; léelo junto a Leiden Ranking Open y SCImago. Verificación de afiliaciones en curso.</p>
+      <p class="note"><strong>Advertencia honesta:</strong> ranking exploratorio, no oficial. Las mega-colaboraciones (física de partículas, astronomía) inflan el h-index de universidades pequeñas; léelo junto a Leiden Ranking Open y SCImago.</p>
     </div>
+  </div>
+  <div class="card" style="margin-top:20px">
+    <h3>🔍 Auditoría de datos (lo que los rankings tradicionales no muestran)</h3>
+    <p style="font-size:14px;color:var(--muted)">OpenAlex es abierto pero no está curado: a veces mezcla instituciones homónimas de distintos países. Antes de publicar, <strong>auditamos las afiliaciones</strong> y depuramos el ranking:</p>
+    <ul style="font-size:14px;padding-left:18px;color:var(--muted)">
+      <li><strong>31 centros e institutos excluidos</strong> — no son universidades (institutos de investigación, parques científicos, fundaciones), aunque OpenAlex los clasifique como educación.</li>
+      <li><strong>1 colisión de afiliación corregida</strong> — "Universidad de Londres" (México) tenía atribuidos papers de la <em>University of London</em> (Reino Unido); lo detectamos revisando sus trabajos más citados (Box-Cox 1964, Bradford Hill 1965) y la excluimos.</li>
+    </ul>
+    <p class="note">Este paso —el mismo que aplican Leiden Ranking y la crítica bibliométrica seria— es lo que un ranking con data secreta no puede ofrecer: aquí cada exclusión es verificable.</p>
   </div>
 </div></section>
 

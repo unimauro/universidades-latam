@@ -26,7 +26,7 @@ navA.forEach(a => a.addEventListener('click', () => document.getElementById('nav
 let U = [], sortK = 'rank', sortAsc = true, mapObj = null;
 
 async function boot() {
-  try { const r = await fetch('data/universidades.json?v=' + Date.now()); const d = await r.json(); U = d.unis || []; window._meta = d.meta || {}; } catch { U = []; }
+  try { const r = await fetch('data/universidades.json?v=' + Date.now()); const d = await r.json(); const all = d.unis || []; window._meta = d.meta || {}; window._centros = all.filter(x => x.tipo && x.tipo !== 'universidad'); U = all.filter(x => !x.tipo || x.tipo === 'universidad'); } catch { U = []; }
   // poblar filtro país y comparador
   const paises = [...new Set(U.map(u => u.cc))].sort((a, b) => (PAIS[a] || a).localeCompare(PAIS[b] || b));
   document.getElementById('fPais').insertAdjacentHTML('beforeend', paises.map(c => `<option value="${c}">${FLAG[c] || ''} ${esc(PAIS[c] || c)}</option>`).join(''));
@@ -86,8 +86,11 @@ function drawRank() {
     <td class="n">${u.cpp ?? '—'}</td>
     <td class="n">${u.q1_pct != null ? u.q1_pct + '%' : '<span class="pill">…</span>'}</td>
   </tr>`).join('');
+  const ce = window._meta?.centros_excluidos || 0, co = window._meta?.colisiones || 0;
   document.getElementById('rankNote').innerHTML = `${rows.length} universidades` + (rows.length > 300 ? ' (mostrando 300)' : '') +
-    `. Índice impact-weighted. ${window._meta?.q1pend ? 'Calidad %Q1 (SCImago) en proceso.' : ''} Fuente: OpenAlex (CC0)${window._meta?.extraido ? ', ' + window._meta.extraido : ''}.`;
+    `. Índice impact-weighted. ${window._meta?.q1pend ? 'Calidad %Q1 (SCImago) en proceso para las de menor puesto. ' : ''}` +
+    `<strong>Auditado</strong>: se excluyeron ${ce} centros/institutos (no universidades) y ${co} colisión de afiliación (OpenAlex mezcló una entidad extranjera homónima). ` +
+    `Fuente: OpenAlex (CC0)${window._meta?.extraido ? ', ' + window._meta.extraido : ''}.`;
 }
 
 function paisAgg() {
