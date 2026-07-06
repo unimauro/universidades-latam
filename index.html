@@ -87,7 +87,7 @@ input,select{padding:9px 12px;border:1px solid var(--line);border-radius:10px;ba
 .controls input{flex:1;min-width:200px}
 .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:color-mix(in srgb,var(--oro) 20%,transparent);color:var(--tinta)}
 .note{font-size:12.5px;color:var(--muted);margin-top:10px}
-#map{height:460px;border-radius:16px;border:1px solid var(--line)}
+#map{height:560px;border-radius:16px;border:1px solid var(--line)}
 .fab{position:fixed;right:18px;bottom:18px;z-index:60;background:var(--primary);color:#fff;border:0;border-radius:50%;width:56px;height:56px;font-size:24px;cursor:pointer;box-shadow:0 8px 24px rgba(20,35,80,.4)}
 .chat{position:fixed;right:18px;bottom:84px;z-index:60;width:min(360px,92vw);height:min(520px,72vh);background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);display:none;flex-direction:column;overflow:hidden}
 .chat.open{display:flex}.chat .top{background:var(--tinta1);color:#fff;padding:12px 14px;font-weight:600;font-size:14px}
@@ -164,7 +164,7 @@ footer{padding:34px 0;color:var(--muted);font-size:13px}
 <section id="mapa"><div class="wrap">
   <div class="eyebrow">Geografía</div>
   <h2>Mapa de la investigación</h2>
-  <p class="lead">Cada burbuja es una universidad; el tamaño refleja su índice de impacto. Explora la distribución geográfica del conocimiento en la región.</p>
+  <p class="lead">Cada burbuja es una universidad: el <strong>tamaño</strong> refleja su índice de impacto y el <strong>color</strong>, la región (dorado = top 20 y España; azul = Latinoamérica). Haz clic para ver sus indicadores. Visibiliza dónde se concentra —y dónde falta— la investigación en la región.</p>
   <div id="map"></div>
 </div></section>
 
@@ -195,6 +195,7 @@ footer{padding:34px 0;color:var(--muted);font-size:13px}
     <div class="card">
       <h3>Índice de impacto (anti-volumen inflado)</h3>
       <p style="font-size:14px;color:var(--muted)">score = 100 · (0,45·<em>h</em> + 0,25·<em>citas/pub</em> + 0,15·<em>volumen</em> + 0,15·<em>citas</em>), normalizado. Pondera el <strong>impacto</strong> por encima de la cantidad: publicar mucho en revistas de bajo perfil no infla el puesto. Volumen y citas en escala logarítmica; citas/pub con tope en el percentil 95 para que un solo paper hiper-citado no domine.</p>
+  <p class="note"><strong>Indicadores de calidad (%Q1 SCImago, per cápita, Nature&amp;Science):</strong> ya calculados para el top 200 y en proceso de extensión al resto (OpenAlex introdujo un límite diario de consultas). El puesto en el ranking <strong>no depende de ellos</strong> — se calcula con el índice de impacto, disponible para las 966 universidades. Los indicadores de calidad son columnas complementarias.</p>
       <p class="note"><strong>Advertencia honesta:</strong> ranking exploratorio, no oficial. Las mega-colaboraciones (física de partículas, astronomía) inflan el h-index de universidades pequeñas; léelo junto a Leiden Ranking Open y SCImago.</p>
     </div>
   </div>

@@ -114,14 +114,25 @@ function opts(extra = {}) {
 
 function drawMap() {
   if (mapObj) { mapObj.remove(); mapObj = null; }
-  mapObj = L.map('map', { scrollWheelZoom: false }).setView([-15, -60], 3);
+  mapObj = L.map('map', { scrollWheelZoom: false, worldCopyJump: true }).setView([-5, -55], 3);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/' + (isDark() ? 'dark_all' : 'light_all') + '/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap, CARTO', maxZoom: 12 }).addTo(mapObj);
   const maxS = Math.max(...U.map(u => u.score));
-  U.filter(u => u.lat && u.lng).slice(0, 600).forEach(u => {
-    const r = 3 + 14 * (u.score / maxS);
-    L.circleMarker([u.lat, u.lng], { radius: r, color: PRIMARY, weight: 1, fillColor: ORO, fillOpacity: .55 })
-      .bindPopup(`<strong>${esc(u.name)}</strong><br>${FLAG[u.cc] || ''} ${esc(PAIS[u.cc] || u.cc)} · #${u.rank}<br>Índice ${u.score} · h ${u.h ?? '—'} · ${fmtN(u.works)} pubs`).addTo(mapObj);
+  // color por top de la región: oro=top20, azul=resto; borde por región
+  const withGeo = U.filter(u => u.lat && u.lng);
+  withGeo.forEach(u => {
+    const r = 3 + 15 * Math.pow(u.score / maxS, 1.3);
+    const top20 = u.rank <= 20;
+    L.circleMarker([u.lat, u.lng], {
+      radius: r, weight: top20 ? 2 : 1,
+      color: u.region === 'España' ? '#c99a2e' : '#2b4a9e',
+      fillColor: top20 ? '#c99a2e' : (u.region === 'España' ? '#e0c06a' : '#4d6fd0'),
+      fillOpacity: top20 ? .85 : .5
+    }).bindPopup(`<strong>#${u.rank} · ${esc(u.name)}</strong><br>${FLAG[u.cc] || ''} ${esc(PAIS[u.cc] || u.cc)}<br>Índice <b>${u.score}</b> · h-index ${u.h ?? '—'} · ${fmtN(u.works)} publicaciones${u.q1_pct != null ? ' · ' + u.q1_pct + '% Q1' : ''}`).addTo(mapObj);
   });
+  // leyenda
+  const lg = L.control({ position: 'bottomright' });
+  lg.onAdd = () => { const div = L.DomUtil.create('div'); div.style.cssText = 'background:var(--card);color:var(--tinta);padding:9px 12px;border-radius:10px;border:1px solid var(--line);font-size:12px;line-height:1.7;box-shadow:var(--shadow)'; div.innerHTML = '<b>Leyenda</b><br><span style="color:#c99a2e">●</span> Top 20 de la región<br><span style="color:#2b4a9e">●</span> Latinoamérica<br><span style="color:#e0c06a">●</span> España<br><small>tamaño = índice de impacto</small>'; return div; };
+  lg.addTo(mapObj);
 }
 
 let cmpChart = null;
