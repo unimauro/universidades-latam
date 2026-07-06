@@ -1,0 +1,6 @@
+etl/venv/
+**/__pycache__/
+*.pyc
+.DS_Store
+node_modules/
+data/universidades-latam-raw.json

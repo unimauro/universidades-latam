@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1330"/><stop offset="0.5" stop-color="#0e1a3a"/><stop offset="1" stop-color="#1b2c5a"/></linearGradient></defs>
+<rect width="1200" height="630" fill="url(#g)"/>
+<text x="70" y="140" font-family="Georgia,serif" font-size="28" fill="#c99a2e" letter-spacing="4">BIBLIOMÉTRICO · ABIERTO · REPRODUCIBLE</text>
+<text x="66" y="240" font-family="Georgia,serif" font-size="58" font-weight="700" fill="#ffffff">Ranking de Universidades</text>
+<text x="66" y="305" font-family="Georgia,serif" font-size="58" font-weight="700" fill="#ffffff">de Latinoamérica y España</text>
+<text x="70" y="410" font-family="-apple-system,Arial" font-size="28" fill="#c7d2ef">~1.000 universidades · 21 países · datos OpenAlex (CC0)</text>
+<text x="70" y="455" font-family="-apple-system,Arial" font-size="28" fill="#c7d2ef">Más transparente que los rankings tradicionales.</text>
+<text x="70" y="585" font-family="-apple-system,Arial" font-size="23" fill="#c99a2e">unimauro.github.io/universidades-latam</text>
+<text x="1010" y="200" font-size="150">🎓</text>
+</svg>
