@@ -77,6 +77,22 @@ nav.links a:hover,nav.links a.on{color:var(--primary);background:color-mix(in sr
 .pod .pscore{font-family:var(--serif);font-size:30px;font-weight:700;color:#fff;line-height:1;margin-top:8px}
 .pod .pscore small{font-size:12px;color:#a9b8de;font-weight:400;font-family:var(--sans)}
 @media(max-width:620px){.podio{grid-template-columns:1fr;gap:10px}}
+/* buscador del hero + tarjeta compartible */
+.herofind{margin-top:26px;max-width:460px}
+.combo.hs>input{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22);color:#fff;font-size:15.5px;padding:14px 16px}
+.combo.hs>input::placeholder{color:#c3d0ee}
+.combo.hs>input:focus{border-color:#e6c065;box-shadow:0 0 0 3px rgba(230,192,101,.25)}
+.micard{margin-top:20px;max-width:460px;background:linear-gradient(160deg,#12224e,#0d1836);border:1px solid rgba(230,192,101,.4);border-radius:18px;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.micard .mtop{display:flex;align-items:center;gap:12px}
+.micard .mflag{font-size:34px}
+.micard .mrk{font-family:var(--serif);font-size:40px;font-weight:700;color:#e6c065;line-height:1}
+.micard .mrk small{font-size:15px;color:#c3d0ee;font-weight:400;font-family:var(--sans)}
+.micard .mname{font-family:var(--serif);font-size:19px;font-weight:600;color:#fff;margin:12px 0 4px;line-height:1.2}
+.micard .mstats{display:flex;gap:18px;margin-top:12px;font-size:13px;color:#c3d0ee;flex-wrap:wrap}
+.micard .mstats b{color:#fff;font-family:var(--serif)}
+.micard .mbtns{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}
+.mbtn{border:0;border-radius:10px;padding:10px 15px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+.mbtn.p{background:#e6c065;color:#0e1a3a}.mbtn.s{background:rgba(255,255,255,.14);color:#fff}
 section{padding:46px 0;border-bottom:1px solid var(--line)}
 section h2{font-size:clamp(22px,3.4vw,30px);color:var(--primary)}
 :root[data-theme="dark"] section h2{color:var(--oro)}
@@ -167,6 +183,10 @@ footer{padding:34px 0;color:var(--muted);font-size:13px}
   <span class="tag">✦ OpenAlex · SCImago · 21 países · reproducible</span>
   <h1>El mapa del conocimiento de <em>Latinoamérica y España</em></h1>
   <p>Un ranking bibliométrico, abierto y reproducible de casi mil universidades de la región. Solo datos abiertos, sin cajas negras: cada número se puede verificar. Hacemos visible lo que los rankings globales dejan en la sombra.</p>
+  <div class="herofind">
+    <div class="combo hs" id="heroSearch" data-ph="🔎 Encuentra tu universidad…"></div>
+  </div>
+  <div id="miCard"></div>
   <div class="podio" id="podio"></div>
 </div></div>
 
@@ -191,6 +211,7 @@ footer{padding:34px 0;color:var(--muted);font-size:13px}
     <th class="n" data-k="score">Índice</th><th class="n" data-k="works">Public.</th>
     <th class="n" data-k="cited">Citas</th><th class="n" data-k="h">h-index</th>
     <th class="n" data-k="cpp">Citas/pub</th><th class="n" data-k="q1_pct">%Q1</th>
+    <th class="n" data-k="trend">Trayectoria</th>
   </tr></thead><tbody></tbody></table></div>
   <p class="note" id="rankNote"></p>
 </div></section>

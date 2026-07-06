@@ -26,11 +26,11 @@ navA.forEach(a => a.addEventListener('click', () => document.getElementById('nav
 let U = [], sortK = 'rank', sortAsc = true, mapObj = null, cmpSel = {};
 
 // ---- Combobox con buscador (reemplaza el <select> nativo feo) ----
-function makeCombo(id, initialOa) {
+function makeCombo(id, initialOa, onPick) {
   const box = document.getElementById(id); if (!box) return;
-  const sel = U.find(u => u.oa === initialOa) || U[0];
+  const sel = initialOa ? U.find(u => u.oa === initialOa) : null;
   cmpSel[id] = sel && sel.oa;
-  box.innerHTML = `<input readonly placeholder="Buscar universidad…"><div class="list"></div>`;
+  box.innerHTML = `<input readonly placeholder="${box.dataset.ph || 'Buscar universidad…'}"><div class="list"></div>`;
   const inp = box.querySelector('input'), list = box.querySelector('.list');
   let hi = -1, shown = [];
   const setLabel = () => { const s = U.find(u => u.oa === cmpSel[id]); inp.value = s ? s.name : ''; };
@@ -42,7 +42,7 @@ function makeCombo(id, initialOa) {
   };
   const open = () => { box.classList.add('open'); inp.removeAttribute('readonly'); inp.value = ''; draw(''); inp.focus(); };
   const close = () => { box.classList.remove('open'); inp.setAttribute('readonly', ''); setLabel(); };
-  const pick = oa => { cmpSel[id] = oa; close(); drawCmp(); };
+  const pick = oa => { cmpSel[id] = oa; close(); if (onPick) onPick(oa); else drawCmp(); };
   inp.addEventListener('focus', () => !box.classList.contains('open') && open());
   inp.addEventListener('mousedown', e => { if (!box.classList.contains('open')) { e.preventDefault(); open(); } });
   inp.addEventListener('input', () => draw(inp.value));
@@ -63,7 +63,9 @@ async function boot() {
   // poblar filtro país y comparador
   const paises = [...new Set(U.map(u => u.cc))].sort((a, b) => (PAIS[a] || a).localeCompare(PAIS[b] || b));
   document.getElementById('fPais').insertAdjacentHTML('beforeend', paises.map(c => `<option value="${c}">${FLAG[c] || ''} ${esc(PAIS[c] || c)}</option>`).join(''));
+  U.forEach(u => { const t = trend(u); u.trend = t ? t.pct : null; }); // precalcular trayectoria p/ ordenar
   makeCombo('cmpA', U[0] && U[0].oa); makeCombo('cmpB', U[1] && U[1].oa);
+  makeCombo('heroSearch', null, pickHero); // buscador del hero → tarjeta compartible
   // listeners
   document.getElementById('q').addEventListener('input', drawRank);
   document.getElementById('fReg').addEventListener('change', drawRank);
@@ -72,6 +74,26 @@ async function boot() {
   render();
 }
 function render() { renderPodio(); renderKpis(); drawRank(); drawPaises(); drawMap(); drawCmp(); }
+
+// ---- Trayectoria: crecimiento en años CERRADOS (excluye parciales 2026-2027) ----
+const LAST_CLOSED = 2025; // último año con indexación razonablemente completa en OpenAlex
+function trend(u) {
+  const by = (u.by || []).filter(y => y.y <= LAST_CLOSED && y.w > 0);
+  if (by.length < 6) return null;
+  const w = {}; by.forEach(y => w[y.y] = y.w);
+  const rec = [2023, 2024, 2025].map(y => w[y] || 0), prev = [2020, 2021, 2022].map(y => w[y] || 0);
+  const ar = rec.reduce((a, b) => a + b, 0) / 3, ap = prev.reduce((a, b) => a + b, 0) / 3;
+  if (!ap) return null;
+  const pct = Math.round(100 * (ar - ap) / ap);
+  return { pct, dir: pct > 4 ? 'up' : pct < -4 ? 'down' : 'flat', spark: by.slice(-8).map(y => y.w) };
+}
+function sparkSVG(vals, dir) {
+  if (!vals || vals.length < 2) return '';
+  const w = 46, h = 16, mn = Math.min(...vals), mx = Math.max(...vals), rng = mx - mn || 1;
+  const pts = vals.map((v, i) => `${(i / (vals.length - 1) * w).toFixed(1)},${(h - (v - mn) / rng * h).toFixed(1)}`).join(' ');
+  const col = dir === 'up' ? '#1d9e6a' : dir === 'down' ? '#d1495b' : '#8a94ad';
+  return `<svg width="${w}" height="${h}" style="vertical-align:middle"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5"/></svg>`;
+}
 
 // ---- Podio top 3 en el hero (elemento vendedor) ----
 function renderPodio() {
@@ -85,6 +107,48 @@ function renderPodio() {
       <div class="pmeta">${FLAG[u.cc] || ''} ${esc(PAIS[u.cc] || u.cc)} · h-index ${u.h ?? '—'}</div>
       <div class="pscore">${u.score}<small> / 100 índice</small></div>
     </div>`).join('');
+}
+
+// ---- #1 "Encuentra tu universidad" → tarjeta compartible ----
+function pickHero(oa) {
+  const u = U.find(x => x.oa === oa); if (!u) return;
+  const el = document.getElementById('miCard'); if (!el) return;
+  const t = trend(u), tr = t ? `${t.dir === 'up' ? '▲ +' : t.dir === 'down' ? '▼ ' : '▬ '}${t.pct}% en producción (últimos años)` : '';
+  el.innerHTML = `<div class="micard">
+    <div class="mtop"><span class="mflag">${FLAG[u.cc] || '🎓'}</span>
+      <div><div class="mrk">#${u.rank} <small>de ${window._meta?.n || U.length} · ${esc(PAIS[u.cc] || u.cc)}</small></div></div></div>
+    <div class="mname">${esc(u.name)}</div>
+    <div class="mstats"><span>Índice <b>${u.score}</b></span><span>h-index <b>${u.h ?? '—'}</b></span><span><b>${fmtN(u.works)}</b> publicaciones</span>${u.q1_pct != null ? `<span><b>${u.q1_pct}%</b> en Q1</span>` : ''}</div>
+    ${tr ? `<div class="mstats" style="margin-top:6px">${tr}</div>` : ''}
+    <div class="mbtns">
+      <button class="mbtn p" onclick="shareCard('${esc(u.oa)}')">⬇ Descargar imagen</button>
+      <button class="mbtn s" onclick="location.hash='#ranking';document.getElementById('q').value='${esc(u.name).replace(/'/g, "\\'")}';document.getElementById('q').dispatchEvent(new Event('input'))">Ver en la tabla</button>
+    </div></div>`;
+}
+// genera un PNG bonito para compartir
+function shareCard(oa) {
+  const u = U.find(x => x.oa === oa); if (!u) return;
+  const W = 1080, H = 1080, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#0a1330'); g.addColorStop(.5, '#0e1a3a'); g.addColorStop(1, '#1b2c5a');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // estrellas
+  for (let i = 0; i < 80; i++) { x.beginPath(); x.arc(Math.random() * W, Math.random() * H, Math.random() * 2, 0, 7); x.fillStyle = 'rgba(200,214,245,' + (Math.random() * .5 + .1) + ')'; x.fill(); }
+  x.textAlign = 'center';
+  x.fillStyle = '#e6c065'; x.font = '600 34px Georgia'; x.fillText('RANKING DE UNIVERSIDADES · LATINOAMÉRICA Y ESPAÑA', W / 2, 130);
+  x.font = '120px serif'; x.fillText(FLAG[u.cc] || '🎓', W / 2, 320);
+  x.fillStyle = '#fff'; x.font = '700 180px Georgia'; x.fillText('#' + u.rank, W / 2, 500);
+  x.fillStyle = '#c3d0ee'; x.font = '34px Georgia'; x.fillText(`de ${window._meta?.n || U.length} universidades · ${PAIS[u.cc] || u.cc}`, W / 2, 560);
+  // nombre (wrap simple)
+  x.fillStyle = '#fff'; x.font = '600 52px Georgia';
+  const words = u.name.split(' '); let line = '', y = 680;
+  words.forEach(wd => { if (x.measureText(line + wd).width > W - 160) { x.fillText(line.trim(), W / 2, y); line = ''; y += 64; } line += wd + ' '; });
+  x.fillText(line.trim(), W / 2, y);
+  // stats
+  x.fillStyle = '#e6c065'; x.font = '600 40px Georgia';
+  x.fillText(`Índice ${u.score}   ·   h-index ${u.h ?? '—'}   ·   ${fmtN(u.works)} publicaciones`, W / 2, y + 110);
+  x.fillStyle = '#8fa0cc'; x.font = '30px Georgia'; x.fillText('unimauro.github.io/universidades-latam · datos OpenAlex (CC0)', W / 2, H - 70);
+  const a = document.createElement('a'); a.download = 'ranking-' + u.cc + '-' + u.rank + '.png'; a.href = c.toDataURL('image/png'); a.click();
 }
 
 // ---- Constelación de fondo del hero ----
@@ -144,6 +208,7 @@ function drawRank() {
     <td class="n">${u.h ?? '—'}</td>
     <td class="n">${u.cpp ?? '—'}</td>
     <td class="n">${u.q1_pct != null ? u.q1_pct + '%' : '<span class="pill">…</span>'}</td>
+    <td class="n">${(() => { const t = trend(u); if (!t) return '—'; const ar = t.dir === 'up' ? '▲' : t.dir === 'down' ? '▼' : '▬'; const cl = t.dir === 'up' ? '#1d9e6a' : t.dir === 'down' ? '#d1495b' : '#8a94ad'; return `<span class="trend" style="color:${cl};display:inline-flex;align-items:center;gap:6px;justify-content:flex-end">${sparkSVG(t.spark, t.dir)} ${ar}${t.pct > 0 ? '+' : ''}${t.pct}%</span>`; })()}</td>
   </tr>`).join('');
   const ce = window._meta?.centros_excluidos || 0, co = window._meta?.colisiones || 0;
   document.getElementById('rankNote').innerHTML = `${rows.length} universidades` + (rows.length > 300 ? ' (mostrando 300)' : '') +
