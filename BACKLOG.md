@@ -6,6 +6,21 @@
 
 Ranking bibliométrico abierto y reproducible (OpenAlex CC0 + SCImago). 966 universidades auditadas, 21 países.
 
+**Última actualización:** agosto 2026 · **Estado:** v1 publicado y en vivo · **Enriquecimiento calidad:** 200/966 (798 pendientes).
+
+---
+
+## ▶️ Por dónde retomar (próxima sesión)
+
+Elegir uno según el objetivo del momento:
+
+1. **Si el objetivo es que PRENDA (difusión):** armar la *munición de difusión* — 4-5 posts (LinkedIn/X/WhatsApp) con gancho por país + la tarjeta compartible. Es lo más barato y de mayor palanca; cierra el hueco de "no tuvo efecto". → ver P1.
+2. **Si el objetivo es COMPLETAR los datos:** correr `etl/enriquecer.py` para llenar el %Q1 de las 798 restantes (esperar reset de cuota OpenAlex o poner ~$0.40 de saldo). → ver P0.
+3. **Si el objetivo es MONETIZAR:** armar la capa B2B (3 CTAs: universidad / prensa / datos). → ver P2.
+4. **Si el objetivo es SEO / que la prensa cite:** perfiles de universidad con deep-link `#u/<id>`. → ver P1.
+
+**Recomendación:** hacer (1) difusión primero — el producto ya está bueno; lo que falta es que la gente lo vea y encuentre SU dato.
+
 ---
 
 ## ✅ Hecho (v1)
